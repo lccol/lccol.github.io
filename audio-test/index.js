@@ -13,9 +13,19 @@ window.onload = () => {
     
     const ctx = new AudioContext();
     let source = ctx.createBufferSource();
-    // const track = ctx.createMediaElementSource(audioElement);
-    
-    // const oscillator = ctx.createOscillator();
+    if(ctx.state === 'suspended'){
+        var resume = function () {
+            ctx.resume();
+        
+            setTimeout(function () {
+              if (ctx.state === 'running') {
+                document.body.removeEventListener('touchend', resume, false);
+              }
+            }, 0);
+          };
+
+        document.body.addEventListener('touchend', resume, false);
+    }
 
     const request = new XMLHttpRequest();
     request.open('GET', 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/858/outfoxing.mp3', true);
