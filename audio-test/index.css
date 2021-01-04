@@ -1,0 +1,19 @@
+#container {
+    border-style: solid;
+    border-color: black;
+    width: 600px;
+    height: 200px;
+    margin: auto;
+}
+#source {
+    border: 1px;
+    background-color: red;
+    width: 100px;
+    height: 30px;
+}
+#source-test {
+    margin: auto;
+}
+html {
+    height: 100%;
+}

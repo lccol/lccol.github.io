@@ -1,6 +1,7 @@
 window.onload = () => {
     const play = document.getElementById('play-stop');
     const button = document.getElementById('alter');
+    const emitter = document.getElementById('source');
     const speedOfSound = 340;
     const dopplerFactor = 1.5;
     let audioData;
@@ -12,7 +13,18 @@ window.onload = () => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     
     const ctx = new AudioContext();
-    let source = ctx.createBufferSource();
+    const oscillator = ctx.createOscillator();
+    oscillator.frequency = 440;
+    oscillator.type = 'sine';
+    oscillator.connect(ctx.destination);
+    anime({
+        targets: emitter,
+        duration: 3000,
+        translateX: (el) => el.parentElement.clientWidth,
+        easing: 'linear',
+        loop: true
+    })
+    // let source = ctx.createBufferSource();
     if(ctx.state === 'suspended'){
         var resume = function () {
             ctx.resume();
@@ -27,29 +39,29 @@ window.onload = () => {
         document.body.addEventListener('touchend', resume, false);
     }
 
-    const request = new XMLHttpRequest();
-    request.open('GET', 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/858/outfoxing.mp3', true);
-    request.responseType = 'arraybuffer';
+    // const request = new XMLHttpRequest();
+    // request.open('GET', 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/858/outfoxing.mp3', true);
+    // request.responseType = 'arraybuffer';
 
-    request.onload = function () {
-        audioData = request.response;
+    // request.onload = function () {
+    //     audioData = request.response;
 
-        ctx.decodeAudioData(audioData, (buffer) => {
-            buffer = buffer;
-            source.buffer = buffer;
-            source.connect(ctx.destination);
-            source.loop = true;
-            // source.start(0);
-            isReady = true;
-            console.log(ctx.state);
-            if(isPlaying){
-                ctx.resume();
-            }
-        },
-        function (e) { console.log('error decoding audio data') });
-    };
+    //     ctx.decodeAudioData(audioData, (buffer) => {
+    //         buffer = buffer;
+    //         source.buffer = buffer;
+    //         source.connect(ctx.destination);
+    //         source.loop = true;
+    //         // source.start(0);
+    //         isReady = true;
+    //         console.log(ctx.state);
+    //         if(isPlaying){
+    //             ctx.resume();
+    //         }
+    //     },
+    //     function (e) { console.log('error decoding audio data') });
+    // };
     
-    request.send();
+    // request.send();
     
     function computePlaybackFactor(listenerVelocity, sourceVelocity) {
         let scaledSpeedOfSound = speedOfSound / dopplerFactor;
@@ -66,27 +78,31 @@ window.onload = () => {
         console.log('Multiplier factor: ' + factor);
 
         console.log(ctx.destination);
-        source.playbackRate.value *= factor;
+        // source.playbackRate.value *= factor;
+        oscillator.frequency.value *= factor
 
-        let newRate = source.playbackRate.value;
+        let newRate = oscillator.frequency.value;
         console.log('New playback: ' + newRate);
     }
     play.onclick = () => {
         console.log('Before: ' + ctx.state);
         if(isPlaying){
             if(isReady){
-                ctx.suspend();
+                // ctx.suspend();
+                oscillator.stop();
             }
             play.textContent = 'Play';
         }
         else{
             if(!started){
                 started = true;
-                source.start(0);
+                // source.start(0);
+                oscillator.start();
                 console.log('Invoking start');
             }
             if(isReady){
-                ctx.resume();
+                // ctx.resume();
+                oscillator.stop();
             }
             play.textContent = 'Stop';
         }
