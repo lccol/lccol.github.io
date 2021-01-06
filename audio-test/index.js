@@ -1,29 +1,79 @@
+const playButton = document.getElementById('play-stop');
+const emitter = document.getElementById('source');
+const animatedListener = document.getElementById('listener2');
+const speedOfSound = 340;
+const baseFrequency = 440;
+const dopplerFactor = 1.5;
+
+function computePlaybackFactor(listenerVelocity, sourceVelocity) {
+    let scaledSpeedOfSound = speedOfSound / dopplerFactor;
+
+    listenerVelocity = Math.min(listenerVelocity, scaledSpeedOfSound);
+    sourceVelocity = Math.min(sourceVelocity, scaledSpeedOfSound);
+
+    let factor = ((speedOfSound - dopplerFactor * listenerVelocity) / (speedOfSound - dopplerFactor * sourceVelocity));
+    return factor;
+}
+
+function computeNewFrequency(frequency, sourceVelocity, mode) {
+    let factor = 1;
+    if(mode === 'coming') {
+        factor = speedOfSound / (speedOfSound - sourceVelocity);
+    }
+    else if(mode === 'going') {
+        factor = speedOfSound / (speedOfSound + sourceVelocity);
+    }
+    else {
+        console.log('invalid mode value: ' + mode);
+    }
+
+    return factor * frequency;
+}
+
+function stop(audioContext, animation1, animation2, playButton) {
+    audioContext.suspend();
+    animation1.pause();
+    animation2.pause();
+    playButton.textContent = 'Play';
+}
+
+function start(audioContext, animation1, animation2, playButton) {
+    audioContext.resume();
+    animation1.play();
+    animation2.play()
+    playButton.textContent = 'Stop';
+}
+
+function disableAllListeners() {
+    $('.listener-button').each(function() {
+        $(this).css('background-color', 'red');
+    });
+}
+
 window.onload = () => {
-    const play = document.getElementById('play-stop');
-    const button = document.getElementById('alter');
-    const emitter = document.getElementById('source');
-    const speedOfSound = 340;
-    const dopplerFactor = 1.5;
     let audioData;
     let buffer;
     let isReady = false;
     let isPlaying = false;
     let started = false;
+    let emitterAnimation;
+    let listenerAnimation;
+    let currentFrequency = baseFrequency;
+    let animator = {
+        targets: [emitter, animatedListener],
+        duration: 3000,
+        translateX: (el) => el.parentElement.clientWidth,
+        easing: 'linear',
+        loop: true
+    };
     
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     
     const ctx = new AudioContext();
     const oscillator = ctx.createOscillator();
-    oscillator.frequency = 440;
+    oscillator.frequency = baseFrequency;
     oscillator.type = 'sine';
     oscillator.connect(ctx.destination);
-    anime({
-        targets: emitter,
-        duration: 3000,
-        translateX: (el) => el.parentElement.clientWidth,
-        easing: 'linear',
-        loop: true
-    })
     // let source = ctx.createBufferSource();
     if(ctx.state === 'suspended'){
         var resume = function () {
@@ -63,35 +113,28 @@ window.onload = () => {
     
     // request.send();
     
-    function computePlaybackFactor(listenerVelocity, sourceVelocity) {
-        let scaledSpeedOfSound = speedOfSound / dopplerFactor;
-    
-        listenerVelocity = Math.min(listenerVelocity, scaledSpeedOfSound);
-        sourceVelocity = Math.min(sourceVelocity, scaledSpeedOfSound);
-    
-        let factor = ((speedOfSound - dopplerFactor * listenerVelocity) / (speedOfSound - dopplerFactor * sourceVelocity));
-        return factor;
-    }
+    $('input[type=radio][name=source]').change(function() {
+        disableAllListeners();
+        $('#' + this.value).css('background-color', 'green');
 
-    button.onclick = () => {
-        let factor = computePlaybackFactor(0, 8.3);
-        console.log('Multiplier factor: ' + factor);
+        if (this.value === 'listener3')
+            mode = 'coming';
+        else if (this.value === 'listener1')
+            mode = 'going';
+        
+        if (this.value !== 'listener2') {
+            currentFrequency = computeNewFrequency(baseFrequency, 30, mode);
+            oscillator.frequency.value = currentFrequency;
+        }
+        else {
+            oscillator.frequency.value = baseFrequency;
+        }
+    });
 
-        console.log(ctx.destination);
-        // source.playbackRate.value *= factor;
-        oscillator.frequency.value *= factor
-
-        let newRate = oscillator.frequency.value;
-        console.log('New playback: ' + newRate);
-    }
-    play.onclick = () => {
+    playButton.onclick = () => {
         console.log('Before: ' + ctx.state);
         if(isPlaying){
-            if(isReady){
-                // ctx.suspend();
-                oscillator.stop();
-            }
-            play.textContent = 'Play';
+            stop(ctx, emitterAnimation, listenerAnimation, playButton);
         }
         else{
             if(!started){
@@ -99,12 +142,14 @@ window.onload = () => {
                 // source.start(0);
                 oscillator.start();
                 console.log('Invoking start');
+
+                listenerAnimation = anime(animator);
+                emitterAnimation = anime(animator);
+                playButton.textContent = 'Stop';
             }
-            if(isReady){
-                // ctx.resume();
-                oscillator.stop();
+            else{
+                start(ctx, emitterAnimation, listenerAnimation, playButton);
             }
-            play.textContent = 'Stop';
         }
         console.log('After: ' + ctx.state);
         isPlaying = !isPlaying;

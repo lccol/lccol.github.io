@@ -2,17 +2,32 @@
 <head>
     <link rel="stylesheet" href="index.css">
     <script type="text/javascript" src="anime.min.js"></script>
+    <script type="text/javascript" src="jquery.min.js"></script>
 </head>
 <body>
     <div id="container">
         <div id="source">
             <p id="source-text">Emettitore</p>
         </div>
+        <div id="listener1" class="listener-button"><p>1</p></div>
+        <div id="listener2" class="listener-button"><p>2</p></div>
+        <div id="listener3" class="listener-button"><p>3</p></div>
     </div>
 
 
-    <button id="play-stop">Play</button>
-    <button id="alter">Altera suono</button>
+    <div id="command-panel">
+        <button id="play-stop">Play</button>
+        <br>
+        <br>
+
+        <input type="radio" id="source1" name="source" value="listener1" autocomplete="off">
+        <label for="source1">1</label>
+        <input type="radio" id="source2" name="source" value="listener2" checked="checked" autocomplete="off">
+        <label for="source2">2</label>
+        <input type="radio" id="source3" name="source" value="listener3" autocomplete="off">
+        <label for="source3">3</label>
+
+    </div>
 
     
 </body>

@@ -2,17 +2,61 @@
     border-style: solid;
     border-color: black;
     width: 600px;
-    height: 200px;
+    height: 300px;
     margin: auto;
+    position: relative;
 }
 #source {
     border: 1px;
     background-color: red;
     width: 100px;
     height: 30px;
+    vertical-align: middle;
+    position: absolute;
+    top: 50%;
 }
-#source-test {
+.listener-button {
+    border-radius: 50%;
+    border-style: solid;
+    height: 50px;
+    width: 50px;
+    border-color: transparent;
+    background-color: red;
+    position: relative;
+    text-align: center;
+    vertical-align: middle;
+}
+/* .listener-button:hover {
+    border-color: yellow;
+} */
+#listener1 {
+    position: relative;
+    float: left;
+}
+#listener2 {
+    top: 200px;
+    position: relative;
+    background-color: green;
+}
+#listener3 {
+    position: relative;
+    float: right;
+}
+#command-panel {
+    height: fit-content;
+    width: fit-content;
+    border-radius: 10px;
+    border-color: black;
+    border-style: solid;
+    vertical-align: middle;
+    text-align: center;
+    align-content: center;
     margin: auto;
+    padding: 25px;
+}
+#source-text {
+    margin: auto;
+    vertical-align: middle;
 }
 html {
     height: 100%;
