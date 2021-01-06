@@ -1,10 +1,10 @@
 const playButton = document.getElementById('play-stop');
 const emitter = document.getElementById('source');
-const animatedListener = document.getElementById('listener2');
+const listener = document.getElementById('listener');
+const animatedListener = document.getElementById('listener');
 const volumeControl = document.getElementById('volume');
 const speedControl = document.getElementById('speed');
 const speedDisplay = document.getElementById('speed-display');
-const listenerSelector = document.getElementsByName('source');
 const speedOfSound = 340;
 const baseFrequency = 440;
 const dopplerFactor = 1.5;
@@ -19,13 +19,13 @@ function computePlaybackFactor(listenerVelocity, sourceVelocity) {
     return factor;
 }
 
-function computeNewFrequency(frequency, sourceVelocity, mode) {
+function computeNewFrequency(frequency, listenerVelocity, mode) {
     let factor = 1;
     if(mode === 'coming') {
-        factor = speedOfSound / (speedOfSound - sourceVelocity);
+        factor = 1 + (listenerVelocity / speedOfSound);
     }
     else if(mode === 'going') {
-        factor = speedOfSound / (speedOfSound + sourceVelocity);
+        factor = 1 - (listenerVelocity / speedOfSound);
     }
     else {
         console.log('invalid mode value: ' + mode);
@@ -38,19 +38,11 @@ function kmhToms(speed) {
     return speed / 3.6;
 }
 
-function computeMode(value) {
-    if (value === 'listener3')
+function computeMode(listenerPosition, emitterPosition) {
+    if (listenerPosition <= emitterPosition)
         return 'coming';
-    else if (value === 'listener1')
+    else
         return 'going';
-}
-
-function getListenerValue() {
-    for (var i = 0, length = listenerSelector.length; i < length; i++) {
-        if (listenerSelector[i].checked) {
-          return listenerSelector[i].value;
-        }
-      }
 }
 
 function msTokmh(speed) {
@@ -71,16 +63,20 @@ function start(audioContext, animation1, animation2, playButton) {
     playButton.textContent = 'Stop';
 }
 
-function disableAllListeners() {
-    $('.listener-button').each(function() {
-        $(this).css('background-color', 'red');
-    });
+function getPosition(id) {
+    let offset = $('#' + id).position().left;
+    let width = $('#' + id).width();
+
+    console.log('offset: ' + offset);
+    console.log('width: ' + width);
+
+    return offset + width / 2;
 }
 
 window.onload = () => {
-    let audioData;
-    let buffer;
-    let isReady = false;
+    // let audioData;
+    // let buffer;
+    // let isReady = false;
     let isPlaying = false;
     let started = false;
     let emitterAnimation;
@@ -88,12 +84,23 @@ window.onload = () => {
     let currentFrequency = baseFrequency;
     let gainNode;
     let speed = 30;
+
+    function animationFunc(anim) {
+        let listenerPos = getPosition('listener');
+        let emitterPos = getPosition('source');
+        let mode = computeMode(listenerPos, emitterPos);
+
+        currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
+        oscillator.frequency.value = currentFrequency;
+    }
+
     let animator = {
-        targets: [emitter, animatedListener],
+        targets: animatedListener,
         duration: 3000,
         translateX: (el) => el.parentElement.clientWidth,
         easing: 'linear',
-        loop: true
+        loop: true,
+        update: animationFunc
     };
     
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -149,34 +156,18 @@ window.onload = () => {
     // };
     
     // request.send();
-    
-    $('input[type=radio][name=source]').change(function() {
-        disableAllListeners();
-        $('#' + this.value).css('background-color', 'green');
-
-        let mode = computeMode(this.value);
-        
-        if (this.value !== 'listener2') {
-            currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
-            oscillator.frequency.value = currentFrequency;
-        }
-        else {
-            currentFrequency = baseFrequency;
-            oscillator.frequency.value = baseFrequency;
-        }
-    });
 
     speedControl.addEventListener('input', function() {
         speedDisplay.textContent = "Velocit\u00E0: " + this.value + " km/h:";
-        let tmp = getListenerValue();
-        if (tmp !== 'listener2') {
-            let mode = computeMode(tmp);
-            speed = kmhToms(parseInt(this.value));
-    
-            currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
-            oscillator.frequency.value = currentFrequency;
-        }
-    })
+        let listenerPos = getPosition('listener');
+        let emitterPos = getPosition('source');
+        let mode = computeMode(listenerPos, emitterPos);
+
+        speed = kmhToms(parseInt(this.value));
+
+        // currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
+        // oscillator.frequency.value = currentFrequency;
+    });
 
     playButton.onclick = () => {
         console.log('Before: ' + ctx.state);

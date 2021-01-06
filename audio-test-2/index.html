@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="index.css">
+    <script type="text/javascript" src="/libs/anime.min.js"></script>
+    <script type="text/javascript" src="/libs/jquery.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <div id="source">
+            <p id="source-text">Emettitore</p>
+        </div>
+        <div id="listener" class="listener-button"><p>1</p></div>
+    </div>
+
+
+    <div id="command-panel">
+        <button id="play-stop">Play</button>
+        <br>
+        <br>
+
+        <p>Volume:</p>
+        <input type="range" id="volume" min="0" max="0.7" value="0.1" step="0.01" data-action="volume">
+
+        <p id="speed-display">Velocità: 30 km/h</p>
+        <input type="range" id="speed" min="10" max="120" value="30" step="5" data-action="speed">
+
+    </div>
+
+    
+</body>
+<script type="text/javascript" src="index.js" charset="utf-8"></script>
