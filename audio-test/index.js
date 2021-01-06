@@ -170,7 +170,7 @@ window.onload = () => {
         speedDisplay.textContent = "Velocità: " + this.value + " km/h:";
         let tmp = getListenerValue();
         let mode = computeMode(tmp);
-        speed = parseInt(this.value);
+        speed = kmhToms(parseInt(this.value));
 
         currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
         oscillator.frequency.value = currentFrequency;
