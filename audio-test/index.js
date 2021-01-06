@@ -167,13 +167,15 @@ window.onload = () => {
     });
 
     speedControl.addEventListener('input', function() {
-        speedDisplay.textContent = "Velocità: " + this.value + " km/h:";
+        speedDisplay.textContent = "Velocit\u00E0: " + this.value + " km/h:";
         let tmp = getListenerValue();
-        let mode = computeMode(tmp);
-        speed = kmhToms(parseInt(this.value));
-
-        currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
-        oscillator.frequency.value = currentFrequency;
+        if (tmp !== 'listener2') {
+            let mode = computeMode(tmp);
+            speed = kmhToms(parseInt(this.value));
+    
+            currentFrequency = computeNewFrequency(baseFrequency, speed, mode);
+            oscillator.frequency.value = currentFrequency;
+        }
     })
 
     playButton.onclick = () => {
