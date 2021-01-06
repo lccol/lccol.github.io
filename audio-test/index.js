@@ -1,6 +1,7 @@
 const playButton = document.getElementById('play-stop');
 const emitter = document.getElementById('source');
 const animatedListener = document.getElementById('listener2');
+const volumeControl = document.getElementById('volume');
 const speedOfSound = 340;
 const baseFrequency = 440;
 const dopplerFactor = 1.5;
@@ -59,6 +60,7 @@ window.onload = () => {
     let emitterAnimation;
     let listenerAnimation;
     let currentFrequency = baseFrequency;
+    let gainNode;
     let animator = {
         targets: [emitter, animatedListener],
         duration: 3000,
@@ -73,7 +75,16 @@ window.onload = () => {
     const oscillator = ctx.createOscillator();
     oscillator.frequency = baseFrequency;
     oscillator.type = 'sine';
-    oscillator.connect(ctx.destination);
+
+    gainNode = ctx.createGain();
+    gainNode.gain.value = volumeControl.value;
+    
+    document.querySelector('[data-action="volume"]');
+        volumeControl.addEventListener('input', function() {
+	    gainNode.gain.value = this.value;
+    }, false);
+
+    oscillator.connect(gainNode).connect(ctx.destination);
     // let source = ctx.createBufferSource();
     if(ctx.state === 'suspended'){
         var resume = function () {
